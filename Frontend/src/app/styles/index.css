@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700;800&family=Poppins:wght@400;500;700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-background: #ffffff;
+    --bg-surface: #f3f4f6;
+    --bg-surface-hover: #e5e7eb;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --color-accent: #2563eb;
+    --color-border: #d1d5db;
+  }
+
+  .dark {
+    --bg-background: #11111b;
+    --bg-surface: #1e1e2e;
+    --bg-surface-hover: #313244;
+    --text-primary: #cdd6f4;
+    --text-secondary: #a6adc8;
+    --color-accent: #89b4fa;
+    --color-border: #313244;
+  }
+
+  .oled {
+    --bg-background: #000000;
+    --bg-surface: #0a0a0a;
+    --bg-surface-hover: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --color-accent: #10b981;
+    --color-border: #27272a;
+  }
+
+  .dracula {
+    --bg-background: #282a36;
+    --bg-surface: #44475a;
+    --bg-surface-hover: #6272a4;
+    --text-primary: #f8f8f2;
+    --text-secondary: #bfbfbf;
+    --color-accent: #bd93f9;
+    --color-border: #6272a4;
+  }
+
+  .nord {
+    --bg-background: #2e3440;
+    --bg-surface: #3b4252;
+    --bg-surface-hover: #434c5e;
+    --text-primary: #eceff4;
+    --text-secondary: #d8dee9;
+    --color-accent: #88c0d0;
+    --color-border: #4c566a;
+  }
+
+  .font-inter { font-family: 'Inter', sans-serif; }
+  .font-poppins { font-family: 'Poppins', sans-serif; }
+  .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+  .font-system { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+  .drag-region { -webkit-app-region: drag; }
+  .no-drag { -webkit-app-region: no-drag; }
+
+  html {
+    font-size: 16px;
+    background: transparent;
+  }
+
+      body {
+    @apply bg-background text-primary antialiased overflow-hidden select-none transition-colors duration-300;
+    height: 100vh;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    /* Видалено contain: strict для усунення лагів ресайзу та багів з абсолютними контейнерами */
+            
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out, background-color 0.3s ease;
+  }
+            
+
+  body.window-ready { opacity: 1; transform: scale(1); }
+  body.window-closing { opacity: 0; transform: scale(0.95); }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-secondary; }
+
+    /* ================= MARKDOWN РЕФАКТОРИНГ ================= */
+  .prose img {
+    border-radius: 8px;
+    display: inline-block !important;
+    margin: 0.25rem !important;
+    vertical-align: middle;
+  }
+  
+        /* Примусове обмеження розмірів заголовків всередині Markdown (захист від зловживання тегом h1 авторами модів) */
+  .prose h1 {
+    font-size: 1.4rem !important;
+    line-height: 1.35 !important;
+    font-weight: 700 !important;
+    margin-top: 1.25rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+  .prose h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.35 !important;
+    font-weight: 700 !important;
+  }
+  .prose h3 {
+    font-size: 1.1rem !important;
+    line-height: 1.35 !important;
+  }
+
+  /* Дозвіл на виділення тексту мишкою */
+  .select-text, .select-text * {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    cursor: text !important;
+  }
+
+  .prose * {
+    max-width: 100% !important;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+  
+  .prose center, .prose [align="center"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Ізоляція таблиць в Markdown, щоб вони скролилися, а не розривали сторінку */
+  .prose table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+            
+            
+
+  /* Іконки (беджі), загорнуті в посилання, стають в рядок */
+            
+  .prose a img, 
+  .prose a picture {
+    display: inline-block !important;
+    margin: 0.25rem !important;
+    vertical-align: middle;
+  }
+
+  /* Вирівнювання по центру, не ламаючи inline-елементи */
+  .prose [align="center"] {
+    text-align: center !important;
+    display: block !important;
+    width: 100%;
+  }
+
+  .prose [align="center"] p {
+    text-align: center !important;
+    display: block !important;
+  }
+
+  /* Режим розробника */
+  .debug-markdown * {
+    outline: 1px dashed rgba(239, 68, 68, 0.5) !important;
+    outline-offset: -1px;
+  }
+}
+            
+
+@keyframes slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}

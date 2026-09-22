@@ -1,0 +1,71 @@
+# === .NET Core (Server) ===
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+**/*.userosscache
+**/*.sln.doccache
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# === Debug & Logs ===
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# === OS specifics ===
+.DS_Store
+*.pem
+Thumbs.db
+
+secrets.local.json   
+
+# Typescript
+*.tsbuildinfo
+
+/test/data
+/.vscode
+/ConduitEnv
+/src/ConduitLauncher.Desktop/wwwroot
+/src/ConduitLauncher.Desktop/wwwroot
+/src/ConduitLauncher.Desktop/wwwroot
+/.agents
+/src/ConduitLauncher.Desktop/wwwroot
+/.agent
+/КОНЦЕПТ
+/tests/visual-runner/artifacts/
+/tests/agent-lens
+/tests
+/artifacts
+/scenarios
+
+src/ConduitLauncher.Infrastructure/
+src/ConduitLauncher.Desktop/
+src/ConduitLauncher.ConsoleTest/
+src/ConduitLauncher.Tests/
+src/ServerAgent.Daemon/
+
+src/ConduitLauncher.Application/Features/
+secrets.local.json
+.env
+.env.*
+ConduitEnv/
+
+node_modules/
+bin/
+obj/
+.vs/
+*.user
+*.log
+.DS_Store
