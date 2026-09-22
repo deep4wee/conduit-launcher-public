@@ -59,7 +59,7 @@ To prevent the React frontend from freezing during heavy operations (like downlo
 
 ---
 
-## 🖼️ Feature Showcase
+## Feature Showcase
 
 The visual interface is built with React and Tailwind CSS, focusing on a clean, responsive, and data-rich user experience.
 
@@ -67,19 +67,22 @@ The visual interface is built with React and Tailwind CSS, focusing on a clean, 
 Native integrations with content platforms ensure accurate metadata parsing, dependency resolution, and license compliance.
 
 <details open>
-  <summary><b>View Mod Browser & Filtering</b></summary>
+  <summary><b>Project Details & Description</b></summary>
   <br/>
-  <img src="images/multi-platform-filters.png" alt="Multi-platform Filters" width="48%">
-  <img src="images/mod-details-overview.png" alt="Mod Details" width="48%">
-  <p><i>Left: Advanced filtering by environment (Client/Server) and specific mod loaders. Right: Formatted Markdown rendering for project descriptions, respecting author guidelines and licenses.</i></p>
+  <img src="images/mod-details-overview.png" alt="Mod Details Overview" width="100%">
+  <p><i>Formatted Markdown rendering for project descriptions, respecting author guidelines and licenses.</i></p>
 </details>
 
 <details open>
-  <summary><b>View Version Matrix & Installation</b></summary>
+  <summary><b>Release Matrix & Smart Installation</b></summary>
   <br/>
-  <img src="images/mod-versions-matrix.png" alt="Versions Matrix" width="48%">
-  <img src="images/instance-install-modal.png" alt="Install Modal" width="48%">
-  <p><i>Left: Detailed release matrix with dynamic badges. Right: The Pre-flight installation modal checking instance compatibility and indicating the chosen Storage Mode.</i></p>
+  <img src="images/mod-versions-matrix.png" alt="Versions Matrix" width="100%">
+  <p><i>Detailed release matrix with dynamic loader and game version badges.</i></p>
+  <br/>
+  <div align="center">
+    <img src="images/instance-install-modal.png" alt="Install Modal" width="70%">
+  </div>
+  <p align="center"><i>The Pre-flight installation modal checking instance compatibility and active Storage Mode.</i></p>
 </details>
 
 ### Instance Orchestration
@@ -88,18 +91,24 @@ Creating and maintaining local game environments without manual folder managemen
 <details open>
   <summary><b>View Instance Management</b></summary>
   <br/>
-  <img src="images/instance-wizard.png" alt="Instance Wizard" width="48%">
-  <img src="images/instance-management.png" alt="Instance Library" width="48%">
-  <p><i>Left: Instance creation wizard supporting Vanilla, Fabric, Forge, NeoForge, Quilt, and LiteLoader. Right: The local instance library.</i></p>
+  <img src="images/instance-management.png" alt="Instance Library" width="100%">
+  <p><i>The local instance library overview.</i></p>
+  <br/>
+  <div align="center">
+    <img src="images/instance-wizard.png" alt="Instance Wizard" width="75%">
+  </div>
+  <p align="center"><i>Instance creation wizard supporting Vanilla, Fabric, Forge, NeoForge, Quilt, and LiteLoader.</i></p>
 </details>
 
 ### Identity & Personalization
 <details open>
   <summary><b>View Authentication & Theming</b></summary>
   <br/>
-  <img src="images/official-auth-flow.png" alt="Microsoft OAuth" width="48%">
-  <img src="images/customization-themes.png" alt="UI Themes" width="48%">
-  <p><i>Left: Official Microsoft Live OAuth2 flow ensuring secure login without credential interception. Right: Built-in UI customization and theme selection.</i></p>
+  <img src="images/official-auth-flow.png" alt="Microsoft OAuth" width="100%">
+  <p><i>Official Microsoft Live OAuth2 flow ensuring secure login without credential interception.</i></p>
+  <br/>
+  <img src="images/customization-themes.png" alt="UI Themes" width="100%">
+  <p><i>Built-in UI customization and theme selection.</i></p>
 </details>
 
 ---
