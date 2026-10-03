@@ -199,10 +199,13 @@ export function VersionDetailsPage() {
                     fileName={selectedFileToInstall.filename}
                     projectId={id}
                     versionId={version.id}
-                    gameVersions={version.game_versions}
+                                        gameVersions={version.game_versions}
                     loaders={version.loaders}
+                    targetInstanceId={null}
+                    iconUrl={dependencies.length > 0 ? dependencies[0].icon_url : undefined} // Можна підтягувати з кешу, але залишаємо опціональним
                 />
             )}
+            
         </motion.div>
     );
 }

@@ -55,10 +55,10 @@ export const useVersionStore = create<VersionState>((set, get) => ({
     try {
       const versions = await versionApi.getVanillaVersions();
       set({ vanillaVersions: versions || [], isLoadingVanilla: false });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Vanilla versions error:', err);
       useToastStore.getState().addToast({ type: 'error', message: 'Failed to load Minecraft versions' });
-      set({ error: err.message, isLoadingVanilla: false });
+      set({ error: (err instanceof Error ? err.message : String(err)), isLoadingVanilla: false });
     }
   },
 
@@ -68,9 +68,9 @@ export const useVersionStore = create<VersionState>((set, get) => ({
     try {
       const loaders = await versionApi.getFabricLoaders();
       set({ fabricLoaders: loaders || [], isLoadingFabric: false });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Fabric versions error:', err);
-      set({ error: err.message, isLoadingFabric: false });
+      set({ error: (err instanceof Error ? err.message : String(err)), isLoadingFabric: false });
     }
   },
 
@@ -83,10 +83,10 @@ export const useVersionStore = create<VersionState>((set, get) => ({
         forgeLoaders: { ...state.forgeLoaders, [mcVersion]: loaders || [] },
         isLoadingForge: { ...state.isLoadingForge, [mcVersion]: false }
       }));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Forge versions error:', err);
       set((state) => ({ 
-        error: err.message, 
+        error: (err instanceof Error ? err.message : String(err)), 
         isLoadingForge: { ...state.isLoadingForge, [mcVersion]: false } 
       }));
     }
@@ -98,9 +98,9 @@ export const useVersionStore = create<VersionState>((set, get) => ({
     try {
       const versions = await versionApi.getForgeSupportedVersions();
       set({ forgeSupportedVersions: versions || [], isLoadingForgeSupported: false });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Forge supported versions error:', err);
-      set({ error: err.message, isLoadingForgeSupported: false });
+      set({ error: (err instanceof Error ? err.message : String(err)), isLoadingForgeSupported: false });
     }
   },
 
@@ -113,10 +113,10 @@ export const useVersionStore = create<VersionState>((set, get) => ({
         neoForgeLoaders: { ...state.neoForgeLoaders, [mcVersion]: loaders || [] },
         isLoadingNeoForge: { ...state.isLoadingNeoForge, [mcVersion]: false }
       }));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('NeoForge versions error:', err);
       set((state) => ({ 
-        error: err.message, 
+        error: (err instanceof Error ? err.message : String(err)), 
         isLoadingNeoForge: { ...state.isLoadingNeoForge, [mcVersion]: false } 
       }));
     }
@@ -128,9 +128,9 @@ export const useVersionStore = create<VersionState>((set, get) => ({
     try {
       const loaders = await versionApi.getQuiltLoaders();
       set({ quiltLoaders: loaders || [], isLoadingQuilt: false });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Quilt versions error:', err);
-      set({ error: err.message, isLoadingQuilt: false });
+      set({ error: (err instanceof Error ? err.message : String(err)), isLoadingQuilt: false });
     }
   },
 
@@ -143,10 +143,10 @@ export const useVersionStore = create<VersionState>((set, get) => ({
         liteLoaderLoaders: { ...state.liteLoaderLoaders, [mcVersion]: loaders || [] },
         isLoadingLiteLoader: { ...state.isLoadingLiteLoader, [mcVersion]: false }
       }));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('LiteLoader versions error:', err);
       set((state) => ({ 
-        error: err.message, 
+        error: (err instanceof Error ? err.message : String(err)), 
         isLoadingLiteLoader: { ...state.isLoadingLiteLoader, [mcVersion]: false } 
       }));
     }

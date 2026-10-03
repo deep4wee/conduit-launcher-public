@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { accountApi, AccountProfile } from '../api/accountApi';
 import { useToastStore } from '@/shared/ui/Toast';
-import { prefsApi } from '@/entities/prefs/api/prefsApi';
 
 interface AccountState {
   accounts: AccountProfile[];
@@ -26,11 +25,12 @@ export const useAccountStore = create<AccountState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const accounts = await accountApi.getAccounts();
-      const prefs = await prefsApi.getPrefs().catch(() => null);
-      const activeId = prefs?.activeAccountId || (accounts.length > 0 ? accounts[0].id : null);
+      const activeAccount = accounts.find((a) => a.isActive);
+      const activeId = activeAccount ? activeAccount.id : (accounts.length > 0 ? accounts[0].id : null);
       set({ accounts, activeAccountId: activeId, isLoading: false });
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to load accounts', isLoading: false });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to load accounts';
+      set({ error: message, isLoading: false });
     }
   },
 
@@ -39,8 +39,9 @@ export const useAccountStore = create<AccountState>((set, get) => ({
     try {
       await accountApi.addOfflineAccount(username);
       await get().loadAccounts();
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to add account', isLoading: false });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to add account';
+      set({ error: msg, isLoading: false });
     }
   },
 
@@ -51,8 +52,8 @@ export const useAccountStore = create<AccountState>((set, get) => ({
       await get().loadAccounts();
       set({ isLoading: false });
       useToastStore.getState().addToast({ message: "Microsoft account added successfully!", type: 'success' });
-    } catch (err: any) {
-      const msg = err.message || 'Failed to add Microsoft account';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to add Microsoft account';
       set({ error: msg, isLoading: false });
       useToastStore.getState().addToast({ message: msg, type: 'error' });
     }
@@ -63,8 +64,9 @@ export const useAccountStore = create<AccountState>((set, get) => ({
     try {
       await accountApi.addModrinthAccount(username, apiKey);
       await get().loadAccounts();
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to add Modrinth account', isLoading: false });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to add Modrinth account';
+      set({ error: msg, isLoading: false });
     }
   },
   
@@ -73,8 +75,9 @@ export const useAccountStore = create<AccountState>((set, get) => ({
     try {
       await accountApi.setActiveAccount(accountId);
       set({ activeAccountId: accountId, isLoading: false });
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to set active account', isLoading: false });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to set active account';
+      set({ error: msg, isLoading: false });
     }
   },
 
@@ -83,8 +86,9 @@ export const useAccountStore = create<AccountState>((set, get) => ({
     try {
       await accountApi.deleteAccount(accountId);
       await get().loadAccounts();
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to delete account', isLoading: false });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete account';
+      set({ error: msg, isLoading: false });
     }
   }
 }));

@@ -6,7 +6,7 @@ import { useUiStore } from '@/shared/model/uiStore';
 import Logo from '@/assets/logo.svg';
 
 import { useState, useEffect } from 'react';
-import { useAccountStore } from '@/entities/account/model/accountStore';
+import { useAccountStore } from '@/entities/account';
 import { AddAccountModal } from '../account-manager/AddAccountModal';
 import { AccountPopover } from '../account-manager/AccountPopover';
 
@@ -39,9 +39,9 @@ export function Sidebar() {
         <>
         <aside 
             onMouseLeave={() => setIsAccountPopoverOpen(false)}
-            className="w-16 hover:w-64 bg-surface border-r border-border transition-all duration-300 ease-in-out flex flex-col h-full group z-40 absolute left-0 top-0 bottom-0 shadow-lg"
+            className="w-16 hover:w-64 bg-surface transition-all duration-300 ease-in-out flex flex-col h-full group z-50 isolate absolute left-0 top-0 bottom-0 shadow-2xl"
         >
-            <div className="h-14 flex items-center px-4 overflow-hidden shrink-0 border-b border-border/50 bg-background/50 drag-region">
+            <div className="h-14 flex items-center px-4 overflow-hidden shrink-0 bg-surface drag-region">
                 <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center p-0.5 no-drag">
                     <img src={Logo} alt="Logo" className="w-full h-full object-contain filter drop-shadow-md text-accent" style={{ filter: 'brightness(0) saturate(100%) invert(75%) sepia(45%) saturate(3065%) hue-rotate(193deg) brightness(101%) contrast(96%)' }} />
                 </div>
@@ -75,6 +75,7 @@ export function Sidebar() {
 
             <div className="p-2 flex flex-col gap-2 shrink-0 mb-2 mt-auto">
                 <button
+                    data-testid="sidebar-settings-button"
                     onClick={() => setSettingsOpen(true)}
                     className="flex items-center h-12 px-2 w-full text-left rounded-xl transition-colors duration-200 text-secondary hover:bg-surfaceHover hover:text-primary outline-none shrink-0 overflow-hidden relative"
                 >

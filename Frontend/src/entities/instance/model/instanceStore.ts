@@ -22,19 +22,21 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const instances = await instanceApi.getInstances();
-      set({ instances, isLoading: false });
-    } catch (e: any) {
-      set({ error: e.message || 'Error', isLoading: false });
+      set({ instances: Array.isArray(instances) ? instances : [], isLoading: false });
+    } catch (e: unknown) {
+      set({ error: e instanceof Error ? e.message : 'Error', isLoading: false });
     }
   },
   deleteInstance: async (id: string) => {
-    set({ isLoading: true, error: null });
+    set((state) => ({ instances: state.instances.filter(i => i.id !== id), error: null }));
     try {
       await instanceApi.deleteInstance(id);
       const instances = await instanceApi.getInstances();
-      set({ instances, isLoading: false });
-    } catch (e: any) {
-      set({ error: e.message || 'Error', isLoading: false });
+      set({ instances: Array.isArray(instances) ? instances : [], isLoading: false });
+    } catch (e: unknown) {
+      const instances = await instanceApi.getInstances();
+      set({ instances: Array.isArray(instances) ? instances : [], error: e instanceof Error ? e.message : 'Error', isLoading: false });
+      throw e;
     }
   },
   renameInstance: async (id: string, newName: string) => {
@@ -42,16 +44,16 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
     try {
       await instanceApi.renameInstance(id, newName);
       const instances = await instanceApi.getInstances();
-      set({ instances, isLoading: false });
-    } catch (e: any) {
-      set({ error: e.message || 'Error', isLoading: false });
+      set({ instances: Array.isArray(instances) ? instances : [], isLoading: false });
+    } catch (e: unknown) {
+      set({ error: e instanceof Error ? e.message : 'Error', isLoading: false });
     }
   },
   openFolder: async (id: string) => {
     try {
       await instanceApi.openInstanceFolder(id);
-    } catch (e: any) {
-      set({ error: e.message || 'Error' });
+    } catch (e: unknown) {
+      set({ error: e instanceof Error ? e.message : 'Error' });
     }
   },
   launchInstance: async (id: string) => {
@@ -59,8 +61,8 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
     set((state) => ({ launchingInstances: { ...state.launchingInstances, [id]: true } }));
     try {
       await instanceApi.launchInstance(id);
-    } catch (e: any) {
-      set({ error: e.message || 'Error' });
+    } catch (e: unknown) {
+      set({ error: e instanceof Error ? e.message : 'Error' });
     } finally {
       set((state) => ({ launchingInstances: { ...state.launchingInstances, [id]: false } }));
     }

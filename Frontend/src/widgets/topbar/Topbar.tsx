@@ -45,7 +45,7 @@ export function Topbar() {
                 if ((e.target as HTMLElement).closest('.no-drag')) return;
                 invoke('WINDOW_DRAG');
             }}
-            className="h-14 bg-background border-b border-border flex items-center justify-between px-4 shrink-0 cursor-move"
+            className="h-14 bg-surface flex items-center justify-between px-4 shrink-0 cursor-move"
         >
             <div className="flex-1 flex items-center pl-4">
                 <h1 className="text-base font-bold tracking-tight text-primary/90">{getPageTitle()}</h1>

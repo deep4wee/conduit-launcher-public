@@ -5,6 +5,7 @@ export interface AccountProfile {
   username: string;
   type: 'Offline' | 'Microsoft' | 'Modrinth';
   hasToken: boolean;
+  isActive?: boolean;
   skinUrl?: string;
 }
 

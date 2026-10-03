@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
 import { User, Key, Globe, Trash2, Plus, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useAccountStore } from '@/entities/account/model/accountStore';
-import { AccountProfile } from '@/entities/account/api/accountApi';
+import { useAccountStore } from '@/entities/account';
+import { AccountProfile } from '@/entities/account';
 import { useClickOutside } from '@/shared/lib/hooks/useClickOutside';
 import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/lib/utils';

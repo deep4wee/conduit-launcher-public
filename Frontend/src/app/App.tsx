@@ -77,7 +77,7 @@ export function App() {
   return (
     <HashRouter>
       <div 
-        className="flex h-screen w-full bg-background text-primary overflow-hidden relative"
+        className="flex h-screen w-full bg-surface text-primary overflow-hidden relative"
         onContextMenu={(e) => e.preventDefault()}
       >
         <WindowResizeHandles />
@@ -87,9 +87,9 @@ export function App() {
         <Sidebar />
         <SettingsModal />
 
-        <div className="flex flex-col flex-1 ml-16 relative h-full">
+        <div className="flex flex-col flex-1 ml-16 relative h-full bg-surface">
           <Topbar />
-          <main className="flex-1 overflow-hidden bg-background">
+          <main className="flex-1 overflow-hidden bg-background rounded-tl-2xl border-t border-l border-border/70 shadow-inner">
             <Routes>
               <Route path="/home" element={<div className="h-full overflow-y-auto p-0"><HomePage /></div>} />
               <Route path="/browser" element={<BrowserPage />} />

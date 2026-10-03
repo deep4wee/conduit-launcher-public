@@ -18,6 +18,7 @@ export interface ModDetails {
     wiki_url?: string;
     project_type: string;
     gallery?: { url: string; featured: boolean; title?: string; description?: string }[];
+    source?: string;
 }
 
 export interface ModVersion {
@@ -32,6 +33,7 @@ export interface ModVersion {
     changelog?: string;
     files: { url: string, filename: string, primary: boolean, size?: number }[];
     dependencies?: { version_id: string | null, project_id: string | null, dependency_type: string }[];
+    source?: string;
 }
 
 export interface TeamMember {
@@ -49,6 +51,7 @@ export interface DependencyProject {
 
 export interface ModrinthProject {
     project_id: string;
+    slug?: string;
     title: string;
     description: string;
     icon_url: string;
@@ -60,6 +63,21 @@ export interface ModrinthProject {
     server_side?: string;
     date_modified?: string;
 }
+
+export interface SearchModsResponse {
+    hits: ModrinthProject[];
+    offset: number;
+    limit: number;
+    total_hits: number;
+}
+
+export interface ModrinthTag {
+    name: string;
+    version?: string;
+    version_type?: string;
+    project_type?: string;
+}
+            
             
             
     

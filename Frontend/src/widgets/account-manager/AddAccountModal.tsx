@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, User, Globe, Key } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useAccountStore } from '@/entities/account/model/accountStore';
+import { useAccountStore } from '@/entities/account';
 import { Button } from '@/shared/ui/Button';
 
 interface AddAccountModalProps {

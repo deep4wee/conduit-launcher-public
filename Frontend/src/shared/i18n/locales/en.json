@@ -1,7 +1,7 @@
 {
   "sidebar": {
     "home": "Home",
-    "browser": "Mod Browser",
+    "browser": "Content Browser",
     "instances": "Instances",
     "servers": "Server Management",
     "settings": "Settings"
@@ -30,12 +30,48 @@
     "create": "Create instance",
     "noInstances": "No instances found",
     "deleteConfirm": "Delete instance?",
-    "deleteWarning": "This action cannot be undone. All mods and worlds will be lost.",
+    "deleteWarning": "Once you delete an instance, there is no going back. Please be certain.",
     "renameTitle": "Rename instance",
     "hours": "hours",
     "play": "Play",
     "stop": "Stop",
     "openFolder": "Open Folder",
+    "settingsSaved": "Settings saved successfully",
+    "saveFailed": "Failed to save settings",
+    "tabGeneral": "General",
+    "tabInstallation": "Installation",
+    "tabOverrides": "Launch Parameters",
+    "instanceName": "Instance Name",
+    "instanceNameDesc": "The display name of the instance.",
+    "dangerZone": "Danger Zone",
+    "storageMode": "Storage Mode",
+    "storageModeDesc": "Choose how mods are stored for this instance.",
+    "isolated": "Isolated",
+    "isolatedDesc": "Standard mode. Mods are copied directly into the instance folder.",
+    "globalCache": "Global Cache & Hardlinks",
+    "globalCacheDesc": "Mods are stored in a central repository and linked here to save disk space.",
+    "repair": "Repair Instance",
+    "repairDesc": "Force re-download of missing or corrupted game files.",
+    "repairBtn": "Repair",
+    "envVersion": "Environment Version",
+    "envVersionDesc": "Change the core version of this instance. Files will be downloaded on next launch.",
+    "loaderLocked": "Minecraft version is locked for modded instances to prevent corruption.",
+    "vanillaLocked": "Cannot change loader type for a vanilla instance.",
+    "customJava": "Java Arguments & Runtime",
+    "customJavaDesc": "Configure Java settings separately for this instance.",
+    "javaPathPlaceholder": "Path to java.exe (Leave empty for auto)",
+    "useGlobalJava": "Auto-detected / Global Default",
+    "maxRam": "Maximum Memory (RAM)",
+    "maxRamDesc": "Set a specific memory limit. Leave empty for default (2048 MB).",
+    "customJvmArgs": "JVM Arguments",
+    "customJvmArgsDesc": "Add custom flags for the Java Virtual Machine.",
+    "aikarHelper": "Use Recommended (Aikar's Flags)",
+    "windowSettings": "Window Settings",
+    "windowSettingsDesc": "Configure resolution and fullscreen mode.",
+    "fullscreen": "Fullscreen Mode",
+    "width": "Width",
+    "height": "Height",
+    "saveChanges": "Save Changes",
     "tabs": {
       "mods": "Mods",
       "resourcepacks": "Resourcepacks",
@@ -45,7 +81,8 @@
       "all": "All instances",
       "custom": "Modded",
       "vanilla": "Vanilla"
-    }
+    },
+    "browseMods": "Browse Mods"
   },
   "searchableSelect": {
     "search": "Search...",
@@ -63,7 +100,8 @@
     "groupByGroup": "Group by: Group",
     "confirmDelete": "Are you sure you want to delete this instance?",
     "enterNewName": "Enter new name:",
-    "filterVanilla": "Vanilla"
+    "filterVanilla": "Vanilla",
+    "title": "Instances"
   },
   "account": {
     "add": "Add account",
@@ -74,7 +112,10 @@
     "enterUsername": "Enter username",
     "enterToken": "Enter token/key",
     "add_type": "Add {{type}}",
-    "microsoftAuthDesc": "Click Add to open a browser window for Microsoft authentication. Log in to your Xbox account."
+    "microsoftAuthDesc": "Click Add to open a browser window for Microsoft authentication. Log in to your Xbox account.",
+    "noAccounts": "No accounts added yet",
+    "delete": "Delete account",
+    "offline": "Offline Account"
   },
   "settings": {
     "title": "Settings",
@@ -123,7 +164,9 @@
       "other_files": "Other Files",
       "free_space": "Free Space",
       "open_folder": "Open Application Folder",
-      "open_folder_desc": "Browse instances, mods, and cache directly."
+      "open_folder_desc": "Browse instances, mods, and cache directly.",
+      "concurrent_downloads": "Concurrent Downloads",
+      "concurrent_desc": "Maximum number of simultaneous downloads. Higher values increase speed on fast networks."
     },
     "java": {
       "install_recommended": "Install recommended",
@@ -149,7 +192,8 @@
       "markdown_debug_desc": "Renders an outline around all Markdown elements to debug visual issues.",
       "network_trace": "Enable Network Tracing",
       "network_trace_desc": "Logs detailed HTTP requests and responses to network_trace.log for debugging APIs."
-    }
+    },
+    "instanceSettings": "Instance Settings"
   },
   "home": {
     "welcome": "Welcome to Conduit",
@@ -181,6 +225,7 @@
     "mod_loaders": "Mod Loaders",
     "server_plugins": "Server Plugins / Cores",
     "game_version": "Game Version",
+    "locked_to_instance": "Locked to instance",
     "sort_by": "Sort by",
     "sort_relevance": "Relevance",
     "sort_downloads": "Downloads",
@@ -193,8 +238,14 @@
       "project_type:mod": "Mods",
       "project_type:modpack": "Modpacks",
       "project_type:resourcepack": "Resource Packs",
-      "project_type:shader": "Shaders"
+      "project_type:shader": "Shaders",
+      "project_type:datapack": "Data Packs",
+      "project_type:plugin": "Plugins",
+      "project_type:world": "Worlds",
+      "project_type:customization": "Customization",
+      "project_type:addon": "Addons"
     },
+    "search_loader": "Search loaders...",
     "environment": "Environment",
     "env_all": "All",
     "env_client": "Client",
@@ -223,7 +274,9 @@
     },
     "download": "Download",
     "search_version": "Search version...",
-    "pagination": "Page {{current}} of {{total}}"
+    "pagination": "Page {{current}} of {{total}}",
+    "filtering_for": "Filtering for instance",
+    "clear_instance_filter": "Clear filter"
   },
   "mod_details": {
     "tab_description": "Description",
@@ -284,7 +337,22 @@
     "unknown": "Unknown",
     "name": "Name",
     "size": "Size",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "load_more": "Load more",
+    "downloading": "Downloading...",
+    "next": "Next",
+    "prev": "Previous",
+    "page": "Page",
+    "version": "Version",
+    "source": "Source",
+    "actions": "Actions",
+    "success": "Success",
+    "add": "Add",
+    "clear": "Clear",
+    "mod": "Mod",
+    "select": "Select...",
+    "loading": "Loading...",
+    "noResults": "No results found"
   },
   "auth": {
     "codeCopied": "Code copied to clipboard",
@@ -316,6 +384,10 @@
     "roughDetection": "Rough detection",
     "environment": "Environment",
     "noModsInstalled": "No mods installed yet.",
+    "allModsUpdated": "All mods are up to date!",
+    "noUpdatesAvailable": "No updates available for installed mods.",
+    "noDisabledMods": "No disabled mods.",
+    "noModsMatchSearch": "No mods match your search query.",
     "viewOnSource": "View on source",
     "scanMods": "Scan dropped mods",
     "updatesAvailable": "Updates Available",
@@ -323,7 +395,11 @@
     "allProjects": "All Projects",
     "searchMods": "Search projects...",
     "installContent": "Install content",
-    "browse": "Browse Modrinth"
+    "browse": "Browse Modrinth",
+    "availableUpdates": "Updates Available",
+    "latestVersionInstalled": "Latest version installed",
+    "viewModDetails": "View mod details",
+    "changeVersion": "Change version"
   },
   "modpack": {
     "install": "Install",
@@ -336,6 +412,33 @@
   "mod_install": {
     "title": "Install Mod",
     "select_instance": "Select Target Instance",
-    "no_compatible_instances": "No compatible instances found for this mod version. Please create a compatible instance."
+    "no_compatible_instances": "No compatible instances found for this mod version. Please create a compatible instance.",
+    "analyzing": "Analyzing dependencies and compatibility...",
+    "conflict_title": "Incompatibility Detected",
+    "files_to_download": "Files to download:",
+    "total_size": "Total size:",
+    "main_mod": "Main Mod",
+    "dependency": "Dependency",
+    "success": "Mod and dependencies installed successfully!",
+    "compatible": "Compatible"
+  },
+  "mod_delete": {
+    "title": "Confirm Deletion",
+    "confirm_msg": "Are you sure you want to delete",
+    "analyzing": "Analyzing dependencies...",
+    "safe_to_delete": "This mod has no dependents. It is safe to remove.",
+    "broken_warning": "Warning: Other mods depend on this!",
+    "orphans_found": "Unused libraries found",
+    "orphans_desc": "These mods were installed automatically as dependencies and are no longer needed by anything else. Do you want to remove them too?",
+    "orphaned_mods_found": "Standalone mod dependencies detected",
+    "orphaned_mods_desc": "These mods were installed as dependencies but are full standalone mods (e.g. Sodium):",
+    "remove_standalone_mods": "Also remove these standalone mods",
+    "warning_dependents": "Warning: Other mods depend on this file!",
+    "dependents_desc": "The following mods may stop working if this mod is deleted:",
+    "auto_remove_orphans": "Also remove unused dependencies (orphans)",
+    "safe_desc": "Are you sure you want to permanently delete this mod from the instance?"
+  },
+  "game": {
+    "terminated": "Game session ended"
   }
 }

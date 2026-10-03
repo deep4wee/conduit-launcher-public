@@ -52,7 +52,7 @@ When downloading content from platforms like Modrinth, Conduit does not just fet
 ### 3. API Security & Tiered Credential Management
 As an open-source project, Conduit employs a tiered security model to prevent API key leakage while remaining fully forkable:
 *   **Public Identifiers (Microsoft OAuth):** Handled securely via MSAL with build-time injection. 
-*   **Private APIs (CurseForge / LLMs):** The desktop client **never** holds private API keys. All requests to protected endpoints are routed through a Serverless Gateway (Reverse Proxy). The gateway injects the secure keys and handles rate-limiting, ensuring zero risk of key extraction via reverse engineering.
+*   **Private APIs (CurseForge / LLMs):** The desktop client **never** holds private API keys. All requests to protected endpoints are routed through a Serverless Gateway (Reverse Proxy). For community forks and independent hosting, developers can deploy our minimal open-source [conduit-gateway-template](https://github.com/conduit-launcher/conduit-gateway-template) in one click to Cloudflare Workers with their own API keys.
 
 ### 4. IPC Bottleneck Mitigation (Log Throttling)
 To prevent the React frontend from freezing during heavy operations (like downloading hundreds of small files or streaming live server console logs), Conduit implements a batching pattern. The C# backend buffers stdout/events and sends them across the Inter-Process Communication (IPC) bridge in throttled batches (e.g., every 150ms). This guarantees a smooth 60 FPS UI experience even under heavy I/O loads.

@@ -3,8 +3,8 @@ import { X, Box, Layers, Image as ImageIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/Button';
 import { SearchableSelect, SelectOption } from '@/shared/ui/SearchableSelect';
-import { useVersionStore } from '@/entities/version/model/versionStore';
-import { instanceApi } from '@/entities/instance/api/instanceApi';
+import { useVersionStore } from '@/entities/version';
+import { instanceApi } from '@/entities/instance';
 
 interface CreateInstanceModalProps {
   isOpen: boolean;
@@ -159,8 +159,8 @@ export function CreateInstanceModal({ isOpen, onClose }: CreateInstanceModalProp
         iconBase64: customLogo
       });
       onClose();
-    } catch (e: any) {
-      alert("Error: " + e.message);
+    } catch (e: unknown) {
+      alert("Error: " + (e instanceof Error ? e.message : String(e)));
     }
   };
 

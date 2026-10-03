@@ -2,8 +2,16 @@ import { useNavigate } from 'react-router-dom';
 import { Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn, getTagBadgeStyle } from '@/shared/lib/utils';
+import { ModrinthProject } from '@/shared/api/types/modrinth';
 
-export function ModCard({ mod, viewMode, onExternalLinkClick }: { mod: any, viewMode: 'grid' | 'list', onExternalLinkClick?: (url: string) => void }) {
+interface ModCardProps {
+    mod: ModrinthProject;
+    viewMode: 'grid' | 'list';
+    onExternalLinkClick?: (url: string) => void;
+}
+
+export function ModCard({ mod, viewMode, onExternalLinkClick }: ModCardProps) {
+            
             
     const { t } = useTranslation();
     const navigate = useNavigate();

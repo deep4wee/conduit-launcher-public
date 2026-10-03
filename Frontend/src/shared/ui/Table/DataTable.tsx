@@ -27,7 +27,7 @@ export function DataTable<T>({ data, columns, keyExtractor, emptyMessage = 'No d
                 {/* Table Header */}
             <div className="hidden md:flex px-6 py-3 border-b border-border bg-surface/50 text-xs font-bold text-secondary uppercase tracking-wider">
                 {columns.map((col, index) => (
-                    <div key={index} className={cn("flex-1 min-w-0", col.className)}>
+                    <div key={index} className={cn("min-w-0", col.className || "flex-1")}>
                         {col.header}
                     </div>
                 ))}
@@ -45,7 +45,7 @@ export function DataTable<T>({ data, columns, keyExtractor, emptyMessage = 'No d
                         )}
                     >
                         {columns.map((col, index) => (
-                            <div key={index} className={cn("flex-1 min-w-0 w-full md:w-auto mt-2 md:mt-0", col.className)}>
+                            <div key={index} className={cn("min-w-0 w-full md:w-auto mt-2 md:mt-0", col.className || "flex-1")}>
                                 {col.render ? col.render(row) : String(row[col.accessor as keyof T])}
                             </div>
                         ))}

@@ -34,7 +34,8 @@ export function ModDetailsPage() {
     const [loadingVersions, setLoadingVersions] = useState(false);
     const [activeTab, setActiveTab] = useState<'description' | 'gallery' | 'changelog' | 'versions'>('description');
 
-    const { targetInstance } = useBrowserStore();
+    const { targetInstance, activePlatform } = useBrowserStore();
+    const platformSource = activePlatform === "curseforge" ? "CurseForge" : "Modrinth";
     // Стан фільтрів для таблиці версій
     const [versionGameFilter, setVersionGameFilter] = useState<string>(targetInstance?.minecraftVersion || 'All');
     const [versionPlatformFilter, setVersionPlatformFilter] = useState<string>(targetInstance?.loaderType || 'All');
@@ -69,30 +70,30 @@ export function ModDetailsPage() {
         useEffect(() => {
         if (!id) return;
         setLoading(true);
-        modApi.getProjectDetails(id)
+        modApi.getProjectDetails(id, platformSource)
             .then(data => setProject(data))
             .catch(console.error)
             .finally(() => setLoading(false));
-    }, [id]);
+    }, [id, platformSource]);
 
     useEffect(() => {
         if ((activeTab === 'versions' || activeTab === 'changelog') && versions.length === 0 && id) {
             setLoadingVersions(true);
-            modApi.getProjectVersions({ projectId: id, gameVersion: '', loader: '' })
+            modApi.getProjectVersions({ projectId: id, gameVersion: '', loader: '', source: platformSource })
                 .then(data => setVersions(data))
                 .catch(console.error)
                 .finally(() => setLoadingVersions(false));
         }
-    }, [activeTab, id, versions.length]);
+    }, [activeTab, id, versions.length, platformSource]);
 
     // Завантаження команди (Авторів)
     useEffect(() => {
         if (id) {
-            modApi.getProjectTeam(id)
+            modApi.getProjectTeam(id, platformSource)
                 .then(data => setTeam(data))
                 .catch(console.error);
         }
-    }, [id]);
+    }, [id, platformSource]);
 
     // Завантаження залежностей на основі першої знайденої версії
     useEffect(() => {
@@ -348,11 +349,14 @@ export function ModDetailsPage() {
                         versionId={installModalData.version.id}
                         gameVersions={installModalData.version.game_versions}
                         loaders={installModalData.version.loaders}
-                        environment={env}
-                        source="Modrinth"
+                                                environment={env}
+                        source={project?.source || platformSource || "Modrinth"}
+                        iconUrl={project.icon_url}
+                        targetInstanceId={targetInstance?.id}
                     />
                 );
             })()}
+            
 
             {modpackModalData.isOpen && (
                 <InstallModpackModal

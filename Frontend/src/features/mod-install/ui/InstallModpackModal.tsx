@@ -34,9 +34,9 @@ export function InstallModpackModal({
         type: 'success'
       });
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       useToastStore.getState().addToast({
-        message: err?.message || t('common.error', 'Failed to install modpack'),
+        message: (err instanceof Error ? err.message : String(err)) || t('common.error', 'Failed to install modpack'),
         type: 'error'
       });
     } finally {

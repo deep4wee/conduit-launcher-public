@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { X, Package, CheckCircle2, Circle, TriangleAlert } from 'lucide-react';
+import { X, Package, CheckCircle2, Circle, TriangleAlert, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/Button';
-import { InstalledModDto } from '@/entities/instance';
+import { InstalledModDto, instanceApi } from '@/entities/instance';
 import { cn } from '@/shared/lib/utils';
+import { useToastStore } from '@/shared/ui/Toast';
 
 interface Props {
     isOpen: boolean;
@@ -16,16 +17,25 @@ export function ExportModpackModal({ isOpen, onClose, instanceId, mods }: Props)
     const { t } = useTranslation();
     const [exportType, setExportType] = useState<'Client' | 'Server'>('Client');
     const [overrides, setOverrides] = useState<Record<string, string>>({});
+    const [isExporting, setIsExporting] = useState(false);
 
     if (!isOpen) return null;
 
-    const handleExport = () => {
-        // Mock export logic, since backend doesn't have an export IPC yet
-        alert(`Exporting ${exportType} modpack for instance ${instanceId}. Overrides: ${JSON.stringify(overrides)}`);
-        onClose();
+    const handleExport = async () => {
+        setIsExporting(true);
+        try {
+            await instanceApi.exportModpack(instanceId, exportType, overrides);
+            useToastStore.getState().addToast({ message: "Export completed successfully or task queued", type: "success" });
+            onClose();
+        } catch (e: unknown) {
+            useToastStore.getState().addToast({ message: e instanceof Error ? e.message : String(e) || "Export failed or cancelled", type: "error" });
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     const toggleEnv = (fileName: string, targetEnv: string) => {
+            
         setOverrides(prev => ({
             ...prev,
             [fileName]: targetEnv
@@ -138,14 +148,16 @@ export function ExportModpackModal({ isOpen, onClose, instanceId, mods }: Props)
                     </div>
                 </div>
 
-                <div className="p-4 border-t border-border bg-surfaceHover/30 flex justify-end gap-3 shrink-0">
-                    <Button variant="secondary" onClick={onClose}>
+                                <div className="p-4 border-t border-border bg-surfaceHover/30 flex justify-end gap-3 shrink-0">
+                    <Button variant="secondary" onClick={onClose} disabled={isExporting}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button variant="primary" onClick={handleExport} className="px-6">
+                    <Button variant="primary" onClick={handleExport} disabled={isExporting} className="px-6 flex items-center gap-2">
+                        {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                         {t('dashboard.export', 'Export modpack')}
                     </Button>
                 </div>
+            
             </div>
         </div>
     );

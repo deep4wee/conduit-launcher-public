@@ -33,10 +33,16 @@ export function BrowserPage() {
                 const currentInstances = useInstanceStore.getState().instances;
                 const found = currentInstances.find(i => i.id === instanceId);
                 if (found) {
-                    store.setTargetInstance(found);
+                    useBrowserStore.getState().setTargetInstance(found);
                 }
             });
+        } else if (useBrowserStore.getState().targetInstance) {
+            useBrowserStore.getState().clearTargetInstance();
         }
+
+        return () => {
+            useBrowserStore.getState().clearTargetInstance();
+        };
     }, [searchParams, fetchInstances]);
 
     const currentPage = Math.floor(store.offset / store.limit) + 1;
@@ -210,19 +216,7 @@ export function BrowserPage() {
                         "gap-4", 
                         viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" : "flex flex-col"
                     )}>
-                                                {store.activePlatform === 'curseforge' ? (
-                            <div className="col-span-full flex flex-col items-center justify-center py-32 text-secondary">
-                                <div className="w-20 h-20 bg-surface border border-border rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                                    <span className="text-4xl">🚧</span>
-                                </div>
-                                <h3 className="text-2xl font-bold text-primary mb-2">CurseForge Integration WIP</h3>
-                                <p className="text-center max-w-md">
-                                                                        CurseForge provider is planned for a future update. <br/><br/>
-                                    <span className="font-mono text-xs bg-surface px-2 py-1 rounded border border-border">Expected: IModProvider -&gt; CurseForgeProvider</span>
-                                </p>
-                            </div>
-            
-                        ) : store.isSearching ? (
+                        {store.isSearching ? (
                             Array.from({ length: 8 }).map((_, i) => (
                                 <div key={i} className="bg-surface border border-border rounded-2xl p-4 flex gap-4 animate-pulse h-32">
                                     <div className="bg-background rounded-xl shrink-0 w-24 h-24"></div>
@@ -248,6 +242,11 @@ export function BrowserPage() {
             
             
                     </div>
+
+                                                                                                    {/* Нижня пагінація більше не потрібна, все перенесено у верхній тулбар */}
+            
+            
+            
                 </div>
             </div>
         </motion.div>

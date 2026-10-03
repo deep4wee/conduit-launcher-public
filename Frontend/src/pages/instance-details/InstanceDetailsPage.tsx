@@ -1,15 +1,14 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Play, Square, Settings, ChevronDown, ChevronLeft, Search, Box, RefreshCw, MoreVertical } from 'lucide-react';
+import { Play, Square, Settings, ChevronLeft, Search, Box, RefreshCw, MoreVertical, Plus, Sparkles, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { cn } from '@/shared/lib/utils';
 import { invoke } from '@/shared/ipc/ipcClient';
 
-import { useInstanceStore, instanceApi, InstanceDto, InstalledModDto } from '@/entities/instance';
+import { useInstanceStore, instanceApi, InstanceDto, InstalledModDto, ModUpdateDto } from '@/entities/instance';
 import { Button } from '@/shared/ui/Button';
 import { Dropdown } from '@/shared/ui/Dropdown';
-import { useBrowserStore } from '@/features/mod-search';
 import { useTaskStore, getTaskType, getTaskProgress, getTaskInstanceId } from '@/entities/task';
 import { InstalledModsTable } from './ui/InstalledModsTable';
 import { ExportModpackModal } from '@/features/modpack-export/ui/ExportModpackModal';
@@ -20,12 +19,14 @@ export function InstanceDetailsPage() {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { instances, fetchInstances, launchingInstances, launchInstance } = useInstanceStore();
-    const { setTargetInstance } = useBrowserStore();
     const { tasks } = useTaskStore();
+            
     
     const [instance, setInstance] = useState<InstanceDto | null>(null);
     const [activeTab, setActiveTab] = useState<'mods' | 'resourcepacks' | 'logs'>('mods');
     const [mods, setMods] = useState<InstalledModDto[]>([]);
+    const [updates, setUpdates] = useState<Record<string, ModUpdateDto>>({});
+    const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
 
     useEffect(() => {
         if (instance && (instance.loaderType.toLowerCase() === 'vanilla' || instance.loaderType === '') && activeTab === 'mods') {
@@ -36,13 +37,36 @@ export function InstanceDetailsPage() {
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
-    const [modFilter, setModFilter] = useState<'all' | 'disabled'>('all');
+    const [modFilter, setModFilter] = useState<'all' | 'disabled' | 'updates'>('all');
+
+    const checkForUpdates = useCallback(async () => {
+        if (!id) return;
+        setIsCheckingUpdates(true);
+        try {
+            const list = await instanceApi.checkModUpdates(id);
+            const map: Record<string, ModUpdateDto> = {};
+            if (Array.isArray(list)) {
+                list.forEach(u => {
+                    if (u.hasUpdate) {
+                        map[u.projectId] = u;
+                        if (u.currentFileName) map[u.currentFileName] = u;
+                    }
+                });
+            }
+            setUpdates(map);
+        } catch (e) {
+            console.error('Failed to check updates:', e);
+        } finally {
+            setIsCheckingUpdates(false);
+        }
+    }, [id]);
 
     const fetchMods = async () => {
         if (!id) return;
         try {
             const result = await instanceApi.getInstalledMods(id);
             setMods(result);
+            checkForUpdates();
         } catch (e) {
             console.error(e);
         }
@@ -66,17 +90,24 @@ export function InstanceDetailsPage() {
     useEffect(() => {
         if (id && instances.length > 0) {
             const found = instances.find(i => i.id === id);
-            setInstance(found || null);
+            if (!found) {
+                navigate('/instances');
+                return;
+            }
+            setInstance(found);
             fetchMods();
         }
-    }, [id, instances]);
+    }, [id, instances, navigate]);
 
     const displayedMods = useMemo(() => {
         if (modFilter === 'disabled') {
             return mods.filter(m => !m.isEnabled);
         }
+        if (modFilter === 'updates') {
+            return mods.filter(m => (m.projectId && updates[m.projectId]?.hasUpdate) || updates[m.fileName]?.hasUpdate);
+        }
         return mods;
-    }, [mods, modFilter]);
+    }, [mods, modFilter, updates]);
 
     if (!instance) {
         return (
@@ -87,9 +118,10 @@ export function InstanceDetailsPage() {
     }
 
     const handleInstallContent = () => {
-        setTargetInstance(instance);
-        navigate('/browser');
+        // Передаємо id через URL, щоб не порушувати FSD і не міняти стейт чужої фічі напряму
+        navigate(`/browser?instanceId=${instance.id}`);
     };
+            ;
 
     return (
         <motion.div 
@@ -188,7 +220,7 @@ export function InstanceDetailsPage() {
                             </Button>
                         );
                     })()}
-                    <Button variant="secondary" className="p-2.5" onClick={() => setIsSettingsModalOpen(true)}>
+                    <Button variant="secondary" className="p-2.5" data-testid="instance-settings-button" title={t('settings.instanceSettings', 'Instance Settings')} onClick={() => setIsSettingsModalOpen(true)}>
                         <Settings className="w-5 h-5" />
                     </Button>
                     <Dropdown
@@ -269,23 +301,17 @@ export function InstanceDetailsPage() {
                                         <Button variant="secondary" className="p-2 text-sm" title={t('common.refresh', 'Refresh')} onClick={fetchMods}>
                                             <RefreshCw className="w-4 h-4" />
                                         </Button>
-                                        <Dropdown 
-                                            align="right"
-                                            trigger={
-                                            <Button variant="primary" className="text-sm px-4 py-2 flex items-center gap-2">
-                                                + {t('dashboard.installContent', 'Install content')}
-                                                <ChevronDown className="w-4 h-4" />
-                                            </Button>
-                                        }>
-                                            <div className="w-48 p-1 flex flex-col">
-                                                <button className="text-left px-3 py-2 text-sm text-primary hover:bg-surfaceHover rounded-lg" onClick={handleInstallContent}>
-                                                    {t('dashboard.browse', 'Browse Modrinth')}
-                                                </button>
-                                            </div>
-                                        </Dropdown>
+                                        <Button 
+                                            variant="primary" 
+                                            className="text-sm px-4 py-2 flex items-center gap-2"
+                                            onClick={handleInstallContent}
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                            {t('dashboard.installContent', 'Встановити контент')}
+                                        </Button>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                     <button 
                                         onClick={() => setModFilter('all')}
                                         className={cn(
@@ -308,13 +334,29 @@ export function InstanceDetailsPage() {
                                     >
                                         {t('dashboard.disabledProjects', 'Disabled Projects')} ({mods.filter(m => !m.isEnabled).length})
                                     </button>
+                                    <button 
+                                        onClick={() => setModFilter(f => f === 'updates' ? 'all' : 'updates')}
+                                        className={cn(
+                                            "px-3 py-1 border transition-colors rounded-full text-xs font-bold flex items-center gap-1.5",
+                                            modFilter === 'updates'
+                                                ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
+                                                : "bg-surface border-border hover:border-secondary text-secondary"
+                                        )}
+                                    >
+                                        {isCheckingUpdates && <Loader2 className="w-3 h-3 animate-spin text-accent" />}
+                                        <Sparkles className="w-3 h-3 text-emerald-400" />
+                                        {t('dashboard.availableUpdates', 'Доступні оновлення')} ({Object.values(updates).filter(u => u.hasUpdate).length})
+                                    </button>
                                 </div>
                             </div>
 
                             <InstalledModsTable 
                                 instanceId={instance.id} 
                                 mods={displayedMods} 
+                                totalModsCount={mods.length}
+                                activeFilter={modFilter}
                                 searchQuery={searchQuery} 
+                                updates={updates}
                                 onRefresh={fetchMods} 
                             />
                         </div>

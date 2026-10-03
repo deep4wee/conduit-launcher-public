@@ -14,10 +14,9 @@ describe('useAccountStore', () => {
   });
 
   it('loadAccounts should populate accounts on success', async () => {
-    const mockAccounts = [
-      { id: '1', username: 'TestUser', type: 'Offline', hasToken: false }
+    const mockAccounts: AccountProfile[] = [
+      { id: '1', username: 'TestUser', type: 'Offline', hasToken: false, isActive: true }
     ];
-    // @ts-ignore
     vi.spyOn(accountApi, 'getAccounts').mockResolvedValue(mockAccounts);
 
     const store = useAccountStore.getState();

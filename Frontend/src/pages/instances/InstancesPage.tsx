@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Box, Play, Terminal, Search, Loader2, FolderOpen, Edit, Trash2, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/Button';
+import { Modal, Input } from '@/shared/ui';
 import { CreateInstanceModal } from '@/widgets/instance-creation/CreateInstanceModal';
-import { useInstanceStore } from '@/entities/instance/model/instanceStore';
+import { useInstanceStore } from '@/entities/instance';
 import { useClickOutside } from '@/shared/lib/hooks/useClickOutside';
 import { cn } from '@/shared/lib/utils';
 import { motion } from 'framer-motion';
@@ -41,7 +42,8 @@ export function InstancesPage() {
     setContextMenu({ x: e.pageX, y: e.pageY, instanceId: id, name });
   };
 
-  const filteredInstances = instances.filter(i => {
+  const safeInstances = Array.isArray(instances) ? instances : [];
+  const filteredInstances = safeInstances.filter(i => {
     if (activeFilter === 'Vanilla' && i.loaderType !== 'Vanilla') return false;
     if (activeFilter === 'Custom' && i.loaderType === 'Vanilla') return false;
     if (searchQuery && !i.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -183,7 +185,12 @@ export function InstancesPage() {
           </div>
           <button 
             className="w-full text-left px-3 py-2 text-sm text-primary hover:bg-surfaceHover flex items-center gap-2"
-            onClick={() => { !launchingInstances?.[contextMenu.instanceId] && launchInstance(contextMenu.instanceId); setContextMenu(null); }}
+            onClick={() => {
+              if (!launchingInstances?.[contextMenu.instanceId]) {
+                launchInstance(contextMenu.instanceId);
+              }
+              setContextMenu(null);
+            }}
           >
             <Play className="w-4 h-4 text-brand" /> {t('common.play', 'Play')}
           </button>
@@ -215,43 +222,54 @@ export function InstancesPage() {
         </div>
       )}
 
-      {deleteModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-surface border border-border rounded-xl w-full max-w-sm p-6 shadow-2xl flex flex-col gap-4">
-            <h3 className="text-lg font-bold text-primary">{t('instance.deleteConfirm', 'Delete instance?')}</h3>
-            <p className="text-sm text-secondary">{t('instance.deleteWarning', 'This action is irreversible. All mods and worlds will be lost.')}</p>
-            <div className="flex gap-2 justify-end mt-2">
-              <Button variant="secondary" onClick={() => setDeleteModal(null)}>{t('common.cancel', 'Cancel')}</Button>
-              <Button variant="primary" className="bg-red-500 hover:bg-red-600 text-white" onClick={async () => { await deleteInstance(deleteModal); setDeleteModal(null); }}>
-                {t('common.delete', 'Delete')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={!!deleteModal}
+        onClose={() => setDeleteModal(null)}
+        title={t('instance.deleteConfirm', 'Delete instance?')}
+        maxWidth="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setDeleteModal(null)}>{t('common.cancel', 'Cancel')}</Button>
+            <Button variant="primary" className="bg-red-500 hover:bg-red-600 text-white" onClick={async () => {
+              if (deleteModal) {
+                const idToDelete = deleteModal;
+                setDeleteModal(null);
+                try {
+                  await deleteInstance(idToDelete);
+                } catch {
+                  // toast / error is already recorded in store
+                }
+              }
+            }}>
+              {t('common.delete', 'Delete')}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-secondary">{t('instance.deleteWarning', 'This action is irreversible. All mods and worlds will be lost.')}</p>
+      </Modal>
 
-      {renameModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-surface border border-border rounded-xl w-full max-w-sm p-6 shadow-2xl flex flex-col gap-4">
-            <h3 className="text-lg font-bold text-primary">{t('instance.renameTitle', 'Rename instance')}</h3>
-            <form onSubmit={handleRenameSubmit} className="flex flex-col gap-4">
-              <input 
-                autoFocus
-                type="text" 
-                value={renameInput}
-                onChange={e => setRenameInput(e.target.value)}
-                className="w-full bg-[#0f0f0f] border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand transition-colors text-primary"
-              />
-              <div className="flex gap-2 justify-end mt-2">
-                <Button type="button" variant="secondary" onClick={() => setRenameModal(null)}>{t('common.cancel', 'Cancel')}</Button>
-                <Button type="submit" variant="primary" disabled={!renameInput.trim() || renameInput === renameModal.currentName}>
-                  {t('common.save', 'Save')}
-                </Button>
-              </div>
-            </form>
+      <Modal
+        isOpen={!!renameModal}
+        onClose={() => setRenameModal(null)}
+        title={t('instance.renameTitle', 'Rename instance')}
+        maxWidth="sm"
+      >
+        <form onSubmit={handleRenameSubmit} className="flex flex-col gap-4">
+          <Input 
+            autoFocus
+            type="text" 
+            value={renameInput}
+            onChange={e => setRenameInput(e.target.value)}
+          />
+          <div className="flex gap-2 justify-end mt-2">
+            <Button type="button" variant="secondary" onClick={() => setRenameModal(null)}>{t('common.cancel', 'Cancel')}</Button>
+            <Button type="submit" variant="primary" disabled={!renameInput.trim() || renameInput === renameModal?.currentName}>
+              {t('common.save', 'Save')}
+            </Button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </motion.div>
   );
 }

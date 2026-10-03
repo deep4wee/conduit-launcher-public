@@ -23,14 +23,15 @@ interface BrowserState {
     isSearching: boolean;
     hasLoadedOnce: boolean;
 
-    setSidebarOpen: (isOpen: boolean) => void;
+        setSidebarOpen: (isOpen: boolean) => void;
     setActivePlatform: (platform: 'modrinth' | 'curseforge') => void;
     setQuery: (query: string) => void;
-    setSearchParam: (key: keyof BrowserState, value: any) => void;
+    setSearchParam: <K extends keyof BrowserState>(key: K, value: BrowserState[K]) => void;
     setTargetInstance: (instance: InstanceDto | null) => void;
     clearTargetInstance: () => void;
     performSearch: () => Promise<void>;
 }
+            
 
 export const useBrowserStore = create<BrowserState>()(
     persist(
@@ -58,10 +59,8 @@ export const useBrowserStore = create<BrowserState>()(
             setQuery: (query) => set({ query }),
 
             setActivePlatform: (platform) => {
-                set({ activePlatform: platform });
-                if (platform === 'modrinth') {
-                    get().performSearch();
-                }
+                set({ activePlatform: platform, offset: 0 });
+                get().performSearch();
             },
 
             setTargetInstance: (instance) => {
@@ -93,8 +92,9 @@ export const useBrowserStore = create<BrowserState>()(
                 get().performSearch();
             },
 
-        setSearchParam: (key, value) => {
-        set({ [key]: value });
+                setSearchParam: (key, value) => {
+        // TypeScript тепер строго перевіряє типізацію ключів та значень
+        set({ [key]: value } as Partial<BrowserState>);
         // Скидаємо offset на 0, якщо змінили фільтр (зміна ліміту також скидає на 1 сторінку)
         if (key !== 'offset' && key !== 'isSearching' && key !== 'results' && key !== 'totalHits' && key !== 'query') {
             set({ offset: 0 });
@@ -102,14 +102,10 @@ export const useBrowserStore = create<BrowserState>()(
         get().performSearch();
     },
             
+            
 
     performSearch: async () => {
         const state = get();
-        
-        if (state.activePlatform === 'curseforge') {
-            set({ results: [], totalHits: 0 });
-            return;
-        }
 
         set({ isSearching: true });
         try {
@@ -138,7 +134,8 @@ export const useBrowserStore = create<BrowserState>()(
                 facets: JSON.stringify(facetsArray),
                 sort: state.sort,
                 offset: state.offset,
-                limit: state.limit
+                limit: state.limit,
+                source: state.activePlatform === 'curseforge' ? 'CurseForge' : 'Modrinth'
             });
 
             if (response && response.hits) {

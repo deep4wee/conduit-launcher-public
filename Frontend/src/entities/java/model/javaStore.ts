@@ -38,10 +38,11 @@ export const useJavaStore = create<JavaState>()(
                 set({ isDetecting: true });
                 try {
                     const runtimes = await javaApi.detectJava();
+                    const safeRuntimes = Array.isArray(runtimes) ? runtimes : [];
                     
-                    // Зливаємо нові з існуючими 
+                    // Зливаємо нові з існуючими (щоб не видалити ті, що додали вручну)
                     const existingPaths = new Set(get().detectedRuntimes.map(r => r.path));
-                    const newRuntimes = runtimes.filter(r => !existingPaths.has(r.path));
+                    const newRuntimes = safeRuntimes.filter(r => !existingPaths.has(r.path));
                     
                     const updatedRuntimes = [...get().detectedRuntimes, ...newRuntimes];
                     set({ detectedRuntimes: updatedRuntimes });
@@ -93,13 +94,15 @@ export const useJavaStore = create<JavaState>()(
                     } else {
                         alert("Failed to install Java: " + result.errorMessage);
                     }
-                } catch (e: any) {
-                    alert("Error during installation: " + e);
+                } catch (e: unknown) {
+                    alert("Error during installation: " + (e instanceof Error ? e.message : String(e)));
                 }
             }
         }),
                 { 
             name: 'conduit-java-settings',
+            // ВИПРАВЛЕННЯ: Зберігаємо ТІЛЬКИ налаштування користувача.
+            // Знайдені середовища (detectedRuntimes) скануються щоразу при запуску, щоб уникнути "мертвих" шляхів.
             partialize: (state) => ({ settings: state.settings })
         }
     )

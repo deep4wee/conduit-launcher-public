@@ -6,18 +6,41 @@ import { cn } from '@/shared/lib/utils';
 import { modApi } from '@/entities/mod';
 import { useBrowserStore } from '@/features/mod-search';
 
-const PROJECT_TYPES = [
-            
-    { id: 'project_type:mod', labelKey: 'browser.categories.project_type:mod' },
-    { id: 'project_type:modpack', labelKey: 'browser.categories.project_type:modpack' },
-    { id: 'project_type:resourcepack', labelKey: 'browser.categories.project_type:resourcepack' },
-    { id: 'project_type:shader', labelKey: 'browser.categories.project_type:shader' }
+const MODRINTH_PROJECT_TYPES = [
+    { id: 'project_type:mod', labelKey: 'browser.categories.project_type:mod', fallback: 'Mods' },
+    { id: 'project_type:modpack', labelKey: 'browser.categories.project_type:modpack', fallback: 'Modpacks' },
+    { id: 'project_type:resourcepack', labelKey: 'browser.categories.project_type:resourcepack', fallback: 'Resource Packs' },
+    { id: 'project_type:shader', labelKey: 'browser.categories.project_type:shader', fallback: 'Shaders' },
+    { id: 'project_type:datapack', labelKey: 'browser.categories.project_type:datapack', fallback: 'Data Packs' },
+    { id: 'project_type:plugin', labelKey: 'browser.categories.project_type:plugin', fallback: 'Plugins' }
+];
+
+const CURSEFORGE_PROJECT_TYPES = [
+    { id: 'project_type:mod', labelKey: 'browser.categories.project_type:mod', fallback: 'Mods' },
+    { id: 'project_type:modpack', labelKey: 'browser.categories.project_type:modpack', fallback: 'Modpacks' },
+    { id: 'project_type:resourcepack', labelKey: 'browser.categories.project_type:resourcepack', fallback: 'Resource Packs' },
+    { id: 'project_type:shader', labelKey: 'browser.categories.project_type:shader', fallback: 'Shaders' },
+    { id: 'project_type:datapack', labelKey: 'browser.categories.project_type:datapack', fallback: 'Data Packs' },
+    { id: 'project_type:plugin', labelKey: 'browser.categories.project_type:plugin', fallback: 'Bukkit Plugins' },
+    { id: 'project_type:world', labelKey: 'browser.categories.project_type:world', fallback: 'Worlds' },
+    { id: 'project_type:customization', labelKey: 'browser.categories.project_type:customization', fallback: 'Customization' },
+    { id: 'project_type:addon', labelKey: 'browser.categories.project_type:addon', fallback: 'Addons' }
 ];
 
 export function ModFilterSidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
    
     const { t } = useTranslation();
     const { activePlatform, setActivePlatform, projectType, selectedLoader, selectedVersion, environment, selectedCategories, setSearchParam, targetInstance } = useBrowserStore();
+
+    const currentProjectTypes = activePlatform === 'curseforge' ? CURSEFORGE_PROJECT_TYPES : MODRINTH_PROJECT_TYPES;
+
+    useEffect(() => {
+        const available = activePlatform === 'curseforge' ? CURSEFORGE_PROJECT_TYPES : MODRINTH_PROJECT_TYPES;
+        if (!available.some(p => p.id === projectType)) {
+            setSearchParam('projectType', 'project_type:mod');
+            setSearchParam('selectedCategories', []);
+        }
+    }, [activePlatform]);
     
     const [loaders, setLoaders] = useState<string[]>([]);
     const [versions, setVersions] = useState<string[]>([]);
@@ -28,12 +51,21 @@ export function ModFilterSidebar({ isOpen, onClose }: { isOpen: boolean, onClose
     const [versionSearchQuery, setVersionSearchQuery] = useState('');
     const filteredVersions = versions.filter(v => v.toLowerCase().includes(versionSearchQuery.toLowerCase()));
 
-    useEffect(() => {
-        modApi.getTags('game_version').then(data => {
-            if (data) setVersions(data.filter(v => v.version_type === 'release').map(v => v.version));
+        useEffect(() => {
+        const source = activePlatform === 'curseforge' ? 'CurseForge' : 'Modrinth';
+
+        modApi.getTags('game_version', source).then(data => {
+            if (data) {
+                const filteredVersions = data
+                    .filter(v => v.version_type === 'release')
+                    .map(v => v.version)
+                    .filter((v): v is string => Boolean(v)); // Type guard для відкидання undefined
+                setVersions(filteredVersions);
+            }
         }).catch(console.error);
 
-        modApi.getTags('loader').then(data => {
+        modApi.getTags('loader', source).then(data => {
+            
             if (data) {
                 const names = data.map((l: any) => l.name);
                 const popular = ['fabric', 'forge', 'neoforge', 'quilt'];
@@ -57,14 +89,14 @@ export function ModFilterSidebar({ isOpen, onClose }: { isOpen: boolean, onClose
             }
         }).catch(console.error);
 
-        modApi.getTags('category').then(data => {
+        modApi.getTags('category', source).then(data => {
             if (data) {
                 const currentType = projectType.replace('project_type:', '');
                 const cats = data.filter((c: any) => c.project_type === currentType).map((c: any) => c.name);
                 setAllCategories(cats);
             }
         }).catch(console.error);
-    }, [projectType]);
+    }, [projectType, activePlatform]);
 
     const toggleCategory = (cat: string) => {
         if (selectedCategories.includes(cat)) {
@@ -78,7 +110,7 @@ export function ModFilterSidebar({ isOpen, onClose }: { isOpen: boolean, onClose
         <>
             {isOpen && (
                 <div 
-                    className="absolute inset-0 bg-black/50 z-30 transition-opacity backdrop-blur-sm" 
+                    className="absolute inset-0 bg-black/40 z-30 transition-opacity" 
                     onClick={onClose}
                 />
             )}
@@ -123,7 +155,7 @@ export function ModFilterSidebar({ isOpen, onClose }: { isOpen: boolean, onClose
                     <div className="bg-surface rounded-xl p-4 border border-border mb-4 shadow-sm">
                         <h3 className="text-sm font-bold text-secondary uppercase tracking-wider mb-3">{t('browser.browse_by')}</h3>
                         <div className="flex flex-col gap-2">
-                            {PROJECT_TYPES.filter(type => {
+                            {currentProjectTypes.filter(type => {
                                 if (environment === 'server' && (type.id === 'project_type:shader' || type.id === 'project_type:resourcepack')) {
                                     return false;
                                 }
@@ -140,7 +172,7 @@ export function ModFilterSidebar({ isOpen, onClose }: { isOpen: boolean, onClose
                                         {projectType === type.id && <div className="w-2 h-2 bg-accent rounded-full" />}
                                     </div>
                                     <span className={cn("text-sm transition-colors", projectType === type.id ? "text-primary font-medium" : "text-secondary group-hover:text-primary")}>
-                                        {t(type.labelKey)}
+                                        {t(type.labelKey, type.fallback)}
                                     </span>
                                 </label>
                             ))}
@@ -171,76 +203,105 @@ export function ModFilterSidebar({ isOpen, onClose }: { isOpen: boolean, onClose
                     {/* Mod Loaders */}
                     {(projectType === 'project_type:mod' || projectType === 'project_type:modpack') && (
                         <div className="bg-surface rounded-xl p-4 border border-border mb-4 shadow-sm flex flex-col">
-                            <h3 className="text-sm font-bold text-secondary uppercase tracking-wider mb-3 shrink-0">{t('browser.mod_loaders')}</h3>
-                            <div className="px-1 mb-2 shrink-0">
-                                <input 
-                                    type="text" 
-                                    placeholder={t('browser.search')} 
-                                    value={loaderSearchQuery} 
-                                    onChange={(e) => setLoaderSearchQuery(e.target.value)} 
-                                    className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent text-primary transition-colors" 
-                                />
+                            <div className="flex items-center justify-between mb-3 shrink-0">
+                                <h3 className="text-sm font-bold text-secondary uppercase tracking-wider">{t('browser.mod_loaders')}</h3>
+                                {targetInstance && (
+                                    <span className="text-[10px] font-bold text-accent bg-accent/15 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                        🔒 {t('browser.locked_to_instance', 'Фіксовано')}
+                                    </span>
+                                )}
                             </div>
-                            <div className="flex flex-col gap-1 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                                {loaders.filter(l => l.toLowerCase().includes(loaderSearchQuery.toLowerCase())).map((l, index, arr) => {
-                                    const isSelected = selectedLoader === l;
-                                    const isServerCore = ['bukkit', 'spigot', 'paper', 'purpur', 'bungeecord', 'velocity', 'waterfall', 'sponge', 'folia'].includes(l);
-                                    const prevIsServerCore = index > 0 && ['bukkit', 'spigot', 'paper', 'purpur', 'bungeecord', 'velocity', 'waterfall', 'sponge', 'folia'].includes(arr[index - 1]);
-                                    const showServerHeader = isServerCore && !prevIsServerCore;
-                                    
-                                    return (
-                                        <div key={l}>
-                                            {showServerHeader && (
-                                                <div className="text-[10px] font-bold text-secondary uppercase tracking-wider mt-3 mb-1 px-1">{t('browser.server_plugins', 'Server Plugins / Cores')}</div>
-                                            )}
-                                            <button 
-                                                onClick={() => setSearchParam('selectedLoader', isSelected ? '' : l)}
-                                                className={cn(
-                                                    "w-full px-3 py-2 rounded-lg text-sm font-bold transition-colors outline-none capitalize text-left flex items-center gap-2", 
-                                                    isSelected 
-                                                        ? "bg-accent/20 text-accent border border-accent/20" 
-                                                        : "text-secondary hover:bg-surfaceHover hover:text-primary border border-transparent"
-                                                )}
-                                            >
-                                                <div className={cn("w-2 h-2 rounded-full", isSelected ? "bg-accent" : "bg-border group-hover:bg-secondary")} />
-                                                {l}
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                            {targetInstance ? (
+                                <div className="flex items-center gap-2 p-2.5 rounded-lg bg-background border border-accent/30 text-accent font-bold text-sm capitalize">
+                                    <div className="w-2 h-2 rounded-full bg-accent" />
+                                    {selectedLoader || targetInstance.loaderType}
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="px-1 mb-2 shrink-0">
+                                        <input 
+                                            type="text" 
+                                            placeholder={t('browser.search_loader', 'Search loader...')} 
+                                            value={loaderSearchQuery} 
+                                            onChange={(e) => setLoaderSearchQuery(e.target.value)} 
+                                            className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent text-primary transition-colors" 
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-1 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                                        {loaders.filter(l => l.toLowerCase().includes(loaderSearchQuery.toLowerCase())).map((l, index, arr) => {
+                                            const isSelected = selectedLoader === l;
+                                            const isServerCore = ['bukkit', 'spigot', 'paper', 'purpur', 'bungeecord', 'velocity', 'waterfall', 'sponge', 'folia'].includes(l);
+                                            const prevIsServerCore = index > 0 && ['bukkit', 'spigot', 'paper', 'purpur', 'bungeecord', 'velocity', 'waterfall', 'sponge', 'folia'].includes(arr[index - 1]);
+                                            const showServerHeader = isServerCore && !prevIsServerCore;
+                                            
+                                            return (
+                                                <div key={l}>
+                                                    {showServerHeader && (
+                                                        <div className="text-[10px] font-bold text-secondary uppercase tracking-wider mt-3 mb-1 px-1">{t('browser.server_plugins', 'Server Plugins / Cores')}</div>
+                                                    )}
+                                                    <button 
+                                                        onClick={() => setSearchParam('selectedLoader', isSelected ? '' : l)}
+                                                        className={cn(
+                                                            "w-full px-3 py-2 rounded-lg text-sm font-bold transition-colors outline-none capitalize text-left flex items-center gap-2", 
+                                                            isSelected 
+                                                                ? "bg-accent/20 text-accent border border-accent/20" 
+                                                                : "text-secondary hover:bg-surfaceHover hover:text-primary border border-transparent"
+                                                        )}
+                                                    >
+                                                        <div className={cn("w-2 h-2 rounded-full", isSelected ? "bg-accent" : "bg-border group-hover:bg-secondary")} />
+                                                        {l}
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
 
                     {/* Game Versions */}
                     <div className="bg-surface rounded-xl p-4 border border-border mb-4 shadow-sm">
-                        <h3 className="text-sm font-bold text-secondary uppercase tracking-wider mb-3">{t('browser.game_version')}</h3>
-                        <div className="relative">
-                            <button onClick={() => setIsVersionDropdownOpen(!isVersionDropdownOpen)} className="w-full bg-background border border-border hover:border-secondary transition-colors rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-accent outline-none flex justify-between items-center font-medium">
-                                {selectedVersion === '' ? t('browser.env_all') : selectedVersion}
-                                <ChevronDown className="w-4 h-4 text-secondary" />
-                            </button>
-                            {isVersionDropdownOpen && (
-                                <>
-                                    <div className="fixed inset-0 z-50" onClick={() => setIsVersionDropdownOpen(false)}></div>
-                                    <div className="absolute top-full left-0 right-0 mt-2 bg-surface border border-border rounded-xl shadow-xl z-[60] overflow-hidden flex flex-col">
-                                        <div className="p-2 border-b border-border">
-                                            <input type="text" placeholder={t('browser.search_version')} value={versionSearchQuery} onChange={(e) => setVersionSearchQuery(e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent text-primary" />
-                                        </div>
-                                        <div className="max-h-48 overflow-y-auto p-1 flex flex-col gap-0.5 custom-scrollbar">
-                                            <button onClick={() => { setSearchParam('selectedVersion', ''); setIsVersionDropdownOpen(false); setVersionSearchQuery(''); }} className="text-left px-3 py-2 rounded-lg text-sm transition-colors outline-none text-secondary font-bold hover:bg-surfaceHover">
-                                                {t('browser.env_all')}
-                                            </button>
-                                            {filteredVersions.map(v => (
-                                                <button key={v} onClick={() => { setSearchParam('selectedVersion', v); setIsVersionDropdownOpen(false); setVersionSearchQuery(''); }} className={cn("text-left px-3 py-2 rounded-lg text-sm transition-colors outline-none", selectedVersion === v ? "bg-accent/10 text-accent font-medium" : "text-primary hover:bg-surfaceHover")}>
-                                                    {v}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </>
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-sm font-bold text-secondary uppercase tracking-wider">{t('browser.game_version')}</h3>
+                            {targetInstance && (
+                                <span className="text-[10px] font-bold text-accent bg-accent/15 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                    🔒 {t('browser.locked_to_instance', 'Фіксовано')}
+                                </span>
                             )}
                         </div>
+                        {targetInstance ? (
+                            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-background border border-accent/30 text-accent font-bold text-sm">
+                                {selectedVersion || targetInstance.minecraftVersion}
+                            </div>
+                        ) : (
+                            <div className="relative">
+                                <button onClick={() => setIsVersionDropdownOpen(!isVersionDropdownOpen)} className="w-full bg-background border border-border hover:border-secondary transition-colors rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-accent outline-none flex justify-between items-center font-medium">
+                                    {selectedVersion === '' ? t('browser.env_all') : selectedVersion}
+                                    <ChevronDown className="w-4 h-4 text-secondary" />
+                                </button>
+                                {isVersionDropdownOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-50" onClick={() => setIsVersionDropdownOpen(false)}></div>
+                                        <div className="absolute top-full left-0 right-0 mt-2 bg-surface border border-border rounded-xl shadow-xl z-[60] overflow-hidden flex flex-col">
+                                            <div className="p-2 border-b border-border">
+                                                <input type="text" placeholder={t('browser.search_version')} value={versionSearchQuery} onChange={(e) => setVersionSearchQuery(e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent text-primary" />
+                                            </div>
+                                            <div className="max-h-48 overflow-y-auto p-1 flex flex-col gap-0.5 custom-scrollbar">
+                                                <button onClick={() => { setSearchParam('selectedVersion', ''); setIsVersionDropdownOpen(false); setVersionSearchQuery(''); }} className="text-left px-3 py-2 rounded-lg text-sm transition-colors outline-none text-secondary font-bold hover:bg-surfaceHover">
+                                                    {t('browser.env_all')}
+                                                </button>
+                                                {filteredVersions.map(v => (
+                                                    <button key={v} onClick={() => { setSearchParam('selectedVersion', v); setIsVersionDropdownOpen(false); setVersionSearchQuery(''); }} className={cn("text-left px-3 py-2 rounded-lg text-sm transition-colors outline-none", selectedVersion === v ? "bg-accent/10 text-accent font-medium" : "text-primary hover:bg-surfaceHover")}>
+                                                        {v}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Categories (Tags) */}
